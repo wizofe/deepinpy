@@ -123,6 +123,7 @@ class Recon(pl.LightningModule):
             num_cg = 0
 
         if (self.current_epoch % self.hparams.save_every_N_epochs == 0) or (self.current_epoch == self.hparams.num_epochs - 1):
+
             _b = inp.shape[0]
             if _b == 1 and idx == 0:
                     _idx = 0
@@ -136,10 +137,16 @@ class Recon(pl.LightningModule):
                         x_adj = self.A.adjoint(inp)
                     else:
                         x_adj = self.x_adj
-                    _x_hat = utils.t2n(x_hat[_idx,...]) 
-                    _x_gt = utils.t2n(imgs[_idx,...])
-                    _x_adj = utils.t2n(x_adj[_idx,...]) 
-              
+                    _x_hat = utils.t2n(x_hat[_idx,...]) # <- high order dims mess this up, need to select 1 of the high orders dims
+                    # for (0, ...)
+                    # nbatch, T1, T2, X, Y, Z
+                    _x_gt = utils.t2n(imgs[_idx,...]) # <- fix these two
+                    _x_adj = utils.t2n(x_adj[_idx,...]) # _x_... assumes it is a 2D array (complex valued)
+                    # torch tensor -> numpy complex array, gets rid of 2
+                    # dont change above lines, add the while loop.
+                    # use image data and add a "1" for high orders to test tensorboard. Can also do duplication, so "2" for high orders.
+                    # fix tensorboard, test on real example, and have an output for next week.
+
                     if self.logger:
                         myim = torch.tensor(np.stack((np.abs(_x_hat), np.angle(_x_hat)), axis=0))[:, None, ...] 
                         grid = make_grid(myim, scale_each=True, normalize=True, nrow=8, pad_value=10)
@@ -170,6 +177,7 @@ class Recon(pl.LightningModule):
         except:
             _lambda = 0
         _epoch = self.current_epoch
+             
         _nrmse = (opt.ip_batch(x_hat - imgs) / opt.ip_batch(imgs)).sqrt().mean().detach().requires_grad_(False)
         _num_cg = np.max(num_cg)
 
@@ -218,7 +226,9 @@ class Recon(pl.LightningModule):
         if self.hparams.distributed_training:
             sampler = torch.utils.data.distributed.DistributedSampler(self.D, shuffle=self.hparams.shuffle)
             shuffle = False
+            num_high_order_dimensions=0
         else:
             sampler = None
             shuffle = self.hparams.shuffle
+            num_high_order_dimensions=0
         return torch.utils.data.DataLoader(self.D, batch_size=self.hparams.batch_size, shuffle=shuffle, num_workers=0, drop_last=True, sampler=sampler)

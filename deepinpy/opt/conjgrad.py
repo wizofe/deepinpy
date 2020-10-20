@@ -2,8 +2,9 @@
 
 import torch
 
+from deepinpy.opt import dot_batch, ip_batch
 from deepinpy.utils import utils
-from deepinpy.opt import ip_batch, dot_batch
+
 
 class ConjGrad(torch.nn.Module):
     """A class which implements conjugate gradient descent as a torch module.
@@ -28,7 +29,7 @@ class ConjGrad(torch.nn.Module):
         verbose (bool): Whether or not to print extra info to the console.
     """
 
-    def __init__(self, rhs, Aop_fun, max_iter=20, l2lam=0., eps=1e-6, verbose=True):
+    def __init__(self, rhs, Aop_fun, max_iter=20, l2lam=0.0, eps=1e-6, verbose=True):
         super(ConjGrad, self).__init__()
 
         self.rhs = rhs
@@ -50,7 +51,15 @@ class ConjGrad(torch.nn.Module):
             The forward pass on x.
 
         """
-        x, num_cg = conjgrad(x, self.rhs, self.Aop_fun, max_iter=self.max_iter, l2lam=self.l2lam, eps=self.eps, verbose=self.verbose)
+        x, num_cg = conjgrad(
+            x,
+            self.rhs,
+            self.Aop_fun,
+            max_iter=self.max_iter,
+            l2lam=self.l2lam,
+            eps=self.eps,
+            verbose=self.verbose,
+        )
         self.num_cg = num_cg
         return x
 
@@ -62,14 +71,15 @@ class ConjGrad(torch.nn.Module):
         """
 
         return {
-                'num_cg': self.num_cg,
-                }
+            "num_cg": self.num_cg,
+        }
 
-def conjgrad(x, b, Aop_fun, max_iter=10, l2lam=0., eps=1e-4, verbose=True):
+
+def conjgrad(x, b, Aop_fun, max_iter=10, l2lam=0.0, eps=1e-4, verbose=True):
     """A function that implements batched conjugate gradient descent; assumes the first index is batch size.
 
     Args:
-    	x (Tensor): The initial input to the algorithm.
+        x (Tensor): The initial input to the algorithm.
     b (Tensor): The residual vector
     Aop_fun (func): A function performing the A matrix operation.
     max_iter (int): Maximum number of times to run conjugate gradient descent.
@@ -78,7 +88,7 @@ def conjgrad(x, b, Aop_fun, max_iter=10, l2lam=0., eps=1e-4, verbose=True):
     verbose (bool): If true, prints extra information to the console.
 
     Returns:
-    	A tuple containing the updated vector x and the number of iterations performed.
+        A tuple containing the updated vector x and the number of iterations performed.
     """
 
     # explicitly remove r from the computational graph
@@ -103,7 +113,7 @@ def conjgrad(x, b, Aop_fun, max_iter=10, l2lam=0., eps=1e-4, verbose=True):
     for i in range(max_iter):
 
         if verbose:
-            print('{i}: {rsnew}'.format(i=i, rsnew=utils.itemize(torch.sqrt(rsnew))))
+            print("{i}: {rsnew}".format(i=i, rsnew=utils.itemize(torch.sqrt(rsnew))))
 
         if rsnew.max() < eps_squared:
             break
@@ -114,7 +124,7 @@ def conjgrad(x, b, Aop_fun, max_iter=10, l2lam=0., eps=1e-4, verbose=True):
             Ap = Aop_fun(p)
         pAp = dot_batch(p, Ap)
 
-        #print(utils.itemize(pAp))
+        # print(utils.itemize(pAp))
 
         alpha = (rsold / pAp).reshape(reshape)
 
@@ -130,8 +140,7 @@ def conjgrad(x, b, Aop_fun, max_iter=10, l2lam=0., eps=1e-4, verbose=True):
         p = beta * p + r
         num_iter += 1
 
-
     if verbose:
-        print('FINAL: {rsnew}'.format(rsnew=torch.sqrt(rsnew)))
+        print("FINAL: {rsnew}".format(rsnew=torch.sqrt(rsnew)))
 
     return x, num_iter

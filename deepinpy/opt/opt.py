@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Vector operations for use in calculating conjugate gradient descent."""
 
-import torch
 import numpy as np
+import torch
 
 
 def dot(x1, x2):
@@ -16,7 +16,8 @@ def dot(x1, x2):
         The dot product of x1 and x2.
     """
 
-    return torch.sum(x1*x2)
+    return torch.sum(x1 * x2)
+
 
 def ip(x):
     """Finds the identity product of a vector.
@@ -30,6 +31,7 @@ def ip(x):
 
     return dot(x, x)
 
+
 def dot_batch(x1, x2):
     """Finds the dot product of two multidimensional Tensors holding batches of data.
 
@@ -42,7 +44,8 @@ def dot_batch(x1, x2):
     """
 
     batch = x1.shape[0]
-    return torch.reshape(x1*x2, (batch, -1)).sum(1)
+    return torch.reshape(x1 * x2, (batch, -1)).sum(1)
+
 
 def ip_batch(x):
     """Finds the identity product of a multidimensional Tensor holding a batch of data.
@@ -56,8 +59,9 @@ def ip_batch(x):
 
     return dot_batch(x, x)
 
+
 def l2ball_proj_batch(x, eps):
-    """ Performs a batch projection onto the L2 ball.
+    """Performs a batch projection onto the L2 ball.
 
     Args:
         x (Tensor): The tensor to be projected.
@@ -67,13 +71,13 @@ def l2ball_proj_batch(x, eps):
         The projection of x onto the L2 ball.
     """
 
-    #print('l2ball_proj_batch')
+    # print('l2ball_proj_batch')
     reshape = (-1,) + (1,) * (len(x.shape) - 1)
     q1 = ip_batch(x).sqrt()
-    #print(eps,q1)
+    # print(eps,q1)
     q1_clamp = torch.min(q1, eps)
 
     z = x * q1_clamp.reshape(reshape) / (1e-8 + q1.reshape(reshape))
-    #q2 = ip_batch(z).sqrt()
-    #print(eps,q1,q2)
+    # q2 = ip_batch(z).sqrt()
+    # print(eps,q1,q2)
     return z

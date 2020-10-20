@@ -5,14 +5,13 @@ Model Checkpointing
 Automatically save model checkpoints during training.
 """
 
-import os
-import shutil
 import logging as log
-import warnings
+import os
 import re
+import shutil
+import warnings
 
 import numpy as np
-
 from pytorch_lightning.callbacks.base import Callback
 
 
@@ -73,9 +72,17 @@ class MyModelCheckpoint(Callback):
         # saves file like: /my/path/here/sample-mnist_epoch=02_val_loss=0.32.ckpt
     """
 
-    def __init__(self, filepath, monitor: str = 'val_loss', verbose: bool = False,
-                 save_top_k: int = 1, save_weights_only: bool = False,
-                 mode: str = 'auto', period: int = 1, prefix: str = ''):
+    def __init__(
+        self,
+        filepath,
+        monitor: str = "val_loss",
+        verbose: bool = False,
+        save_top_k: int = 1,
+        save_weights_only: bool = False,
+        mode: str = "auto",
+        period: int = 1,
+        prefix: str = "",
+    ):
         super().__init__()
         if save_top_k and os.path.isdir(filepath) and len(os.listdir(filepath)) > 0:
             warnings.warn(
@@ -86,7 +93,7 @@ class MyModelCheckpoint(Callback):
         self.monitor = monitor
         self.verbose = verbose
         if os.path.isdir(filepath):
-            self.dirpath, self.filename = filepath, '{epoch}'
+            self.dirpath, self.filename = filepath, "{epoch}"
         else:
             self.dirpath, self.filename = os.path.split(filepath)
 
@@ -98,22 +105,24 @@ class MyModelCheckpoint(Callback):
         self.prefix = prefix
         self.best_k_models = {}
         # {filename: monitor}
-        self.kth_best_model = ''
+        self.kth_best_model = ""
         self.best = 0
         self.save_function = None
 
         mode_dict = {
-            'min': (np.less, np.Inf, 'min'),
-            'max': (np.greater, -np.Inf, 'max'),
-            'auto': (np.greater, -np.Inf, 'max') if 'acc' in self.monitor or self.monitor.startswith('fmeasure')
-            else (np.less, np.Inf, 'min'),
+            "min": (np.less, np.Inf, "min"),
+            "max": (np.greater, -np.Inf, "max"),
+            "auto": (np.greater, -np.Inf, "max")
+            if "acc" in self.monitor or self.monitor.startswith("fmeasure")
+            else (np.less, np.Inf, "min"),
         }
 
         if mode not in mode_dict:
             warnings.warn(
-                f'ModelCheckpoint mode {mode} is unknown, '
-                'fallback to auto mode.', RuntimeWarning)
-            mode = 'auto'
+                f"ModelCheckpoint mode {mode} is unknown, " "fallback to auto mode.",
+                RuntimeWarning,
+            )
+            mode = "auto"
 
         self.monitor_op, self.kth_value, self.mode = mode_dict[mode]
 
@@ -156,22 +165,24 @@ class MyModelCheckpoint(Callback):
         'missing=0.ckpt'
         """
         # check if user passed in keys to the string
-        groups = re.findall(r'(\{.*?)[:\}]', self.filename)
+        groups = re.findall(r"(\{.*?)[:\}]", self.filename)
 
         if len(groups) == 0:
             # default name
-            filename = f'{self.prefix}_ckpt_epoch_{epoch}'
+            filename = f"{self.prefix}_ckpt_epoch_{epoch}"
         else:
-            metrics['epoch'] = epoch
+            metrics["epoch"] = epoch
             filename = self.filename
             for tmp in groups:
                 name = tmp[1:]
-                filename = filename.replace(tmp, name + '={' + name)
+                filename = filename.replace(tmp, name + "={" + name)
                 if name not in metrics:
                     metrics[name] = 0
             filename = filename.format(**metrics)
-        str_ver = f'_v{ver}' if ver is not None else ''
-        filepath = os.path.join(self.dirpath, self.prefix + filename + str_ver + '.ckpt')
+        str_ver = f"_v{ver}" if ver is not None else ""
+        filepath = os.path.join(
+            self.dirpath, self.prefix + filename + str_ver + ".ckpt"
+        )
         return filepath
 
     def on_validation_end(self, trainer, pl_module):
@@ -186,38 +197,41 @@ class MyModelCheckpoint(Callback):
             # no models are saved
             return
 
-        #print('RURURURR')
-        #print(trainer.batch_idx, trainer.num_training_batches)
+        # print('RURURURR')
+        # print(trainer.batch_idx, trainer.num_training_batches)
 
         if self.epochs_since_last_check >= self.period:
             self.epochs_since_last_check = 0
 
             filepath = self.format_checkpoint_name(epoch, metrics)
-            #version_cnt = 0
-            #while os.path.isfile(filepath):
-                #filepath = self.format_checkpoint_name(epoch, metrics, ver=version_cnt)
-                ## this epoch called before
-                #version_cnt += 1
+            # version_cnt = 0
+            # while os.path.isfile(filepath):
+            # filepath = self.format_checkpoint_name(epoch, metrics, ver=version_cnt)
+            ## this epoch called before
+            # version_cnt += 1
 
             if self.save_top_k != -1:
                 current = metrics.get(self.monitor)
 
                 if current is None:
                     warnings.warn(
-                        f'Can save best model only with {self.monitor} available,'
-                        ' skipping.', RuntimeWarning)
+                        f"Can save best model only with {self.monitor} available,"
+                        " skipping.",
+                        RuntimeWarning,
+                    )
                 else:
                     if self.check_monitor_top_k(current):
                         self._do_check_save(filepath, current, epoch)
                     else:
                         if self.verbose > 0:
                             log.info(
-                                f'\nEpoch {epoch:05d}: {self.monitor}'
-                                f' was not in top {self.save_top_k}')
+                                f"\nEpoch {epoch:05d}: {self.monitor}"
+                                f" was not in top {self.save_top_k}"
+                            )
 
             else:
                 if self.verbose > 0:
-                    log.info(f'\nEpoch {epoch:05d}: saving model to {filepath}')
+                    log.info(f"\nEpoch {epoch:05d}: saving model to {filepath}")
                 self._save_model(filepath)
 
     def _do_check_save(self, filepath, current, epoch):
@@ -231,17 +245,17 @@ class MyModelCheckpoint(Callback):
         self.best_k_models[filepath] = current
         if len(self.best_k_models) == self.save_top_k:
             # monitor dict has reached k elements
-            _op = max if self.mode == 'min' else min
-            self.kth_best_model = _op(self.best_k_models,
-                                      key=self.best_k_models.get)
+            _op = max if self.mode == "min" else min
+            self.kth_best_model = _op(self.best_k_models, key=self.best_k_models.get)
             self.kth_value = self.best_k_models[self.kth_best_model]
 
-        _op = min if self.mode == 'min' else max
+        _op = min if self.mode == "min" else max
         self.best = _op(self.best_k_models.values())
 
         if self.verbose > 0:
             log.info(
-                f'\nEpoch {epoch:05d}: {self.monitor} reached'
-                f' {current:0.5f} (best {self.best:0.5f}), saving model to'
-                f' {filepath} as top {self.save_top_k}')
+                f"\nEpoch {epoch:05d}: {self.monitor} reached"
+                f" {current:0.5f} (best {self.best:0.5f}), saving model to"
+                f" {filepath} as top {self.save_top_k}"
+            )
         self._save_model(filepath)

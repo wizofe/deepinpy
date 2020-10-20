@@ -104,7 +104,7 @@ class DeepBasisPursuitRecon(Recon):
                 s_norm = opt.ip_batch(self.l2lam * self.A.adjoint(z - z_old)).sqrt()
                 if (r_norm + s_norm).max() < 1e-2:
                     if self.debug_level > 0:  # TODO: where is a defined?
-                        tqdm.tqdm.write("stopping early.") #, a={}".format(a))
+                        tqdm.tqdm.write("stopping early.")  # , a={}".format(a))
                     break
         return x
 

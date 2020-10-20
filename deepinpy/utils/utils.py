@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import torch
-import numpy as np
 import h5py
+import numpy as np
 import scipy
+import torch
 
 import deepinpy.utils.complex as cp
 
@@ -12,17 +12,19 @@ Utility functions """
 '''
 # FIXME: Some methods use sub-methods that have optional param axes, axes should also be added to these methods
 
+
 def h5_write(filename, data):
     """Read numpy arrays from h5 file.
 
     Args:
         filename (str): Path to the file
         data (dict): Dictionary of data to save
-        
+
     """
-    with h5py.File(filename, 'w') as F:
+    with h5py.File(filename, "w") as F:
         for key in data.keys():
             F.create_dataset(key, data=data[key])
+
 
 def h5_read(filename, key_list):
     """Read numpy arrays from h5 file.
@@ -35,14 +37,15 @@ def h5_read(filename, key_list):
         A dictionary of numpy arrays matching key_list
     """
     data = {}
-    with h5py.File(filename, 'r') as F:
+    with h5py.File(filename, "r") as F:
         for key in key_list:
             try:
                 data[key] = np.array(F[key])
-            except:
-                print('Key {} not found in {}. Skipping.'.format(key, filename))
+            except Exception:
+                print("Key {} not found in {}. Skipping.".format(key, filename))
                 data[key] = None
     return data
+
 
 # TODO: Unused, potentially depreciated
 # FIXME: Dim should be an optional parameter for consistency with torch.topk
@@ -59,8 +62,9 @@ def topk(inp, k, dim):
     """
     _topk, _idx = torch.topk(abs(inp), k, dim=dim)
     _topk = torch.gather(inp, dim, _idx).sign() * _topk
-    out = 0*inp
+    out = 0 * inp
     return out.scatter_(dim, _idx, _topk)
+
 
 def t2n(x):
     """Converts a 2-channel real Tensor into a numpy array containing complex values.
@@ -74,6 +78,7 @@ def t2n(x):
 
     return cp.r2c(t2n2(x))
 
+
 def t2n2(x):
     """Converts a Tensor into a numpy array directly.
 
@@ -85,6 +90,7 @@ def t2n2(x):
     """
 
     return np.array(x.detach().cpu())
+
 
 def itemize(x):
     """Converts a Tensor into a list of Python numbers.
@@ -101,6 +107,7 @@ def itemize(x):
     else:
         return x.item()
 
+
 def fftmod(out):
     """Performs a modulated FFT on the input, that is multiplying every other line by exp(j*pi) which is a shift of N/2, hence modulating the output by +/- pi.
 
@@ -112,10 +119,11 @@ def fftmod(out):
     """
 
     out2 = out.copy()
-    out2[...,::2,:] *= -1
-    out2[...,:,::2] *= -1
+    out2[..., ::2, :] *= -1
+    out2[..., :, ::2] *= -1
     out2 *= -1
     return out2
+
 
 def fftshift(x, axes=(-2, -1)):
     """Shifts the zero-frequency component of the last two dimensions of the input to the center of the spectrum.
@@ -130,6 +138,7 @@ def fftshift(x, axes=(-2, -1)):
 
     return scipy.fftpack.fftshift(x, axes=axes)
 
+
 def ifftshift(x, axes=(-2, -1)):
     """Removes the effects of shifting the zero-frequency component of the last two dimensions of the input to the center of the spectrum.
 
@@ -143,6 +152,7 @@ def ifftshift(x, axes=(-2, -1)):
 
     return scipy.fftpack.ifftshift(x, axes=axes)
 
+
 def fft2c(x):
     """Performs a 2-dimensional centered FFT on the last two dimensions of the input.
 
@@ -155,6 +165,7 @@ def fft2c(x):
 
     return fftshift(fft2(ifftshift(x)))
 
+
 def ifft2c(x):
     """Performs an inverse 2-dimensional centered FFT on the last two dimensions of the input.
 
@@ -166,6 +177,7 @@ def ifft2c(x):
     """
     return ifftshift(ifft2(fftshift(x)))
 
+
 def fft2uc(x):
     """Performs a unitary-centered 2-dimensional FFT on the last two dimensions of the input.
 
@@ -176,6 +188,7 @@ def fft2uc(x):
         The unitary-centered 2-dimensional FFT of x.
     """
     return fft2c(x) / np.sqrt(np.prod(x.shape[-2:]))
+
 
 def ifft2uc(x):
     """Performs an inverse unitary-centered 2-dimensional FFT on the last two dimensions of the input.
@@ -189,6 +202,7 @@ def ifft2uc(x):
 
     return ifft2c(x) * np.sqrt(np.prod(x.shape[-2:]))
 
+
 def fft2(x, axes=(-2, -1)):
     """Performs a 2-dimensional FFT on the last two dimensions of the input.
 
@@ -201,6 +215,7 @@ def fft2(x, axes=(-2, -1)):
     """
 
     return scipy.fftpack.fft2(x, axes=axes)
+
 
 def ifft2(x, axes=(-2, -1)):
     """Performs an inverse 2-dimensional FFT on the last two dimensions of the input.

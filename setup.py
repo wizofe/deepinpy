@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="deepinp",
-    version="0.0.1",
+    version="0.0.2",
     author="Jon Tamir",
     author_email="jtamir@utexas.edu",
     description="Deep inverse problems in Python",

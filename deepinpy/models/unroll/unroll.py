@@ -21,7 +21,7 @@ class UnrollNet(torch.nn.Module):
     def forward(self, x):
         metadata_list = []
         for i in range(self.num_unrolls):
-            _data_list = []
+            # _data_list = [] TODO: unused; keep until commented code blw fixed
             for module, data in zip(self.module_list, self.data_list):
                 x = module(x)
                 m = module.get_metadata()
@@ -32,17 +32,17 @@ class UnrollNet(torch.nn.Module):
     def get_metadata(self):
         return self.metadata_list
 
-    #def forward_all(self, x):
-        #data_list = []
-        #_x = x
-        #x_list = [_x]
-        #for i in range(self.num_unrolls):
-            #_x_list = []
-            #_data_list = []
-            #for module in self.module_list
-                #_x, _d = self.model(_x)
-                #_x_list.append(_x)
-                #_data_list.append(_d)
-            #x_list.append(_x_list)
-            #data_list.append(_data_list)
-        #return x_list, data_list
+    # def forward_all(self, x):
+    # data_list = []
+    # _x = x
+    # x_list = [_x]
+    # for i in range(self.num_unrolls):
+    # _x_list = []
+    # _data_list = []
+    # for module in self.module_list
+    # _x, _d = self.model(_x)
+    # _x_list.append(_x)
+    # _data_list.append(_d)
+    # x_list.append(_x_list)
+    # data_list.append(_data_list)
+    # return x_list, data_list

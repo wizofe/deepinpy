@@ -6,61 +6,77 @@ from deepinpy.utils import utils
 
 
 class Conv2dSame(torch.nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, bias=True, padding_layer=torch.nn.ReflectionPad2d):
+    def __init__(
+        self,
+        in_channels,
+        out_channels,
+        kernel_size,
+        bias=True,
+        padding_layer=torch.nn.ReflectionPad2d,
+    ):
         super().__init__()
         ka = kernel_size // 2
         kb = ka - 1 if kernel_size % 2 == 0 else ka
         self.net = torch.nn.Sequential(
-            padding_layer((ka,kb,ka,kb)),
-            torch.nn.Conv2d(in_channels, out_channels, kernel_size, bias=bias)
+            padding_layer((ka, kb, ka, kb)),
+            torch.nn.Conv2d(in_channels, out_channels, kernel_size, bias=bias),
         )
+
     def forward(self, x):
         return self.net(x)
 
 
 class ResNet5Block(torch.nn.Module):
-    def __init__(self, num_filters=32, filter_size=3, T=4, num_filters_start=2, num_filters_end=2, batch_norm=False):
+    def __init__(
+        self,
+        num_filters=32,
+        filter_size=3,
+        T=4,
+        num_filters_start=2,
+        num_filters_end=2,
+        batch_norm=False,
+    ):
         super(ResNet5Block, self).__init__()
         num_filters_start = num_filters_end = 2
         if batch_norm:
             self.model = torch.nn.Sequential(
-                Conv2dSame(num_filters_start,num_filters,filter_size),
-                torch.nn.BatchNorm2d(num_filters),
-                nn.ReLU(),
-                Conv2dSame(num_filters,num_filters,filter_size),
+                Conv2dSame(num_filters_start, num_filters, filter_size),
                 torch.nn.BatchNorm2d(num_filters),
                 torch.nn.ReLU(),
-                Conv2dSame(num_filters,num_filters,filter_size),
+                Conv2dSame(num_filters, num_filters, filter_size),
                 torch.nn.BatchNorm2d(num_filters),
                 torch.nn.ReLU(),
-                Conv2dSame(num_filters,num_filters,filter_size),
+                Conv2dSame(num_filters, num_filters, filter_size),
                 torch.nn.BatchNorm2d(num_filters),
                 torch.nn.ReLU(),
-                Conv2dSame(num_filters,num_filters,filter_size),
+                Conv2dSame(num_filters, num_filters, filter_size),
                 torch.nn.BatchNorm2d(num_filters),
                 torch.nn.ReLU(),
-                Conv2dSame(num_filters,num_filters_end,filter_size)
+                Conv2dSame(num_filters, num_filters, filter_size),
+                torch.nn.BatchNorm2d(num_filters),
+                torch.nn.ReLU(),
+                Conv2dSame(num_filters, num_filters_end, filter_size),
             )
         else:
             self.model = torch.nn.Sequential(
-                Conv2dSame(num_filters_start,num_filters,filter_size),
+                Conv2dSame(num_filters_start, num_filters, filter_size),
                 torch.nn.ReLU(),
-                Conv2dSame(num_filters,num_filters,filter_size),
+                Conv2dSame(num_filters, num_filters, filter_size),
                 torch.nn.ReLU(),
-                Conv2dSame(num_filters,num_filters,filter_size),
+                Conv2dSame(num_filters, num_filters, filter_size),
                 torch.nn.ReLU(),
-                Conv2dSame(num_filters,num_filters,filter_size),
+                Conv2dSame(num_filters, num_filters, filter_size),
                 torch.nn.ReLU(),
-                Conv2dSame(num_filters,num_filters,filter_size),
+                Conv2dSame(num_filters, num_filters, filter_size),
                 torch.nn.ReLU(),
-                Conv2dSame(num_filters,num_filters_end,filter_size)
+                Conv2dSame(num_filters, num_filters_end, filter_size),
             )
         self.T = T
-        
-    def forward(self,x,device='cpu'):
+
+    def forward(self, x, device="cpu"):
         return x + self.step(x, device=device)
-    
-    def step(self, x, device='cpu'):
+
+    def step(self, x, device="cpu"):
         # reshape (batch,x,y,channel=2) -> (batch,channe=2,x,y)
         x = x.permute(0, 3, 1, 2)
         y = self.model(x)
@@ -68,7 +84,17 @@ class ResNet5Block(torch.nn.Module):
 
 
 class ResNetBlock(torch.nn.Module):
-    def __init__(self, in_channels=2, latent_channels=64, out_channels=64, kernel_size=3, bias=False, batch_norm=True, final_relu=True, dropout=0):
+    def __init__(
+        self,
+        in_channels=2,
+        latent_channels=64,
+        out_channels=64,
+        kernel_size=3,
+        bias=False,
+        batch_norm=True,
+        final_relu=True,
+        dropout=0,
+    ):
         super(ResNetBlock, self).__init__()
 
         self.batch_norm = batch_norm
@@ -132,26 +158,42 @@ class ResNetBlock(torch.nn.Module):
         return out
 
     def _conv(self, in_channels, out_channels):
-        return Conv2dSame(in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=self.kernel_size,
-                bias=self.bias)
+        return Conv2dSame(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=self.kernel_size,
+            bias=self.bias,
+        )
 
     def _conv_zero(self, in_channels, out_channels):
-        return Conv2dSame(in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=1,
-                bias=self.bias)
+        return Conv2dSame(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=1,
+            bias=self.bias,
+        )
 
     def _bn(self, channels):
         return torch.nn.BatchNorm2d(channels)
 
     def _relu(self):
-        #return torch.nn.ReLU(inplace=True)
+        # return torch.nn.ReLU(inplace=True)
         return torch.nn.ReLU()
 
+
 class ResNet(torch.nn.Module):
-    def __init__(self, in_channels=2, latent_channels=64, num_blocks=3, kernel_size=7, bias=False, batch_norm=True, dropout=0, topk=None, l1lam=None):
+    def __init__(
+        self,
+        in_channels=2,
+        latent_channels=64,
+        num_blocks=3,
+        kernel_size=7,
+        bias=False,
+        batch_norm=True,
+        dropout=0,
+        topk=None,
+        l1lam=None,
+    ):
         super(ResNet, self).__init__()
 
         self.batch_norm = batch_norm
@@ -165,13 +207,13 @@ class ResNet(torch.nn.Module):
         self.dropout = dropout
 
         self.ResNetBlocks = self._build_model()
-        #self.ResNetBlocks = self._build_model_bottleneck()
+        # self.ResNetBlocks = self._build_model_bottleneck()
 
-        #self.weights = self.ResNetBlocks[self.num_blocks // 2].conv2.weight
+        # self.weights = self.ResNetBlocks[self.num_blocks // 2].conv2.weight
 
         self.l1lam = l1lam
         if self.l1lam:
-            #self.threshold = torch.nn.Threshold(self.l1lam, 0)
+            # self.threshold = torch.nn.Threshold(self.l1lam, 0)
             self.threshold = torch.nn.Softshrink(self.l1lam)
 
         self.topk = topk
@@ -189,32 +231,53 @@ class ResNet(torch.nn.Module):
                     act = utils.topk(act, self.topk, dim=1)
                 x = act
         x += residual
-        #return x.permute(0, 2, 3, 1), act
+        # return x.permute(0, 2, 3, 1), act
         return x.permute(0, 2, 3, 1)
 
     def _build_model(self):
         ResNetBlocks = torch.nn.ModuleList()
 
         # first block goes from input space (2ch) to latent space (64ch)
-        ResNetBlocks.append(self._add_block(final_relu=True, in_channels=self.in_channels, latent_channels=self.latent_channels, out_channels=self.latent_channels))
+        ResNetBlocks.append(
+            self._add_block(
+                final_relu=True,
+                in_channels=self.in_channels,
+                latent_channels=self.latent_channels,
+                out_channels=self.latent_channels,
+            )
+        )
 
-        # middle blocks go from latent space to latent space 
+        # middle blocks go from latent space to latent space
         for n in range(self.num_blocks - 2):
-            ResNetBlocks.append(self._add_block(final_relu=True, in_channels=self.latent_channels, latent_channels=self.latent_channels, out_channels=self.latent_channels))
+            ResNetBlocks.append(
+                self._add_block(
+                    final_relu=True,
+                    in_channels=self.latent_channels,
+                    latent_channels=self.latent_channels,
+                    out_channels=self.latent_channels,
+                )
+            )
 
         # last block goes from latent space to output space (2ch) with no ReLU
-        ResNetBlocks.append(self._add_block(final_relu=False, in_channels=self.latent_channels, latent_channels=self.latent_channels, out_channels=self.in_channels))
+        ResNetBlocks.append(
+            self._add_block(
+                final_relu=False,
+                in_channels=self.latent_channels,
+                latent_channels=self.latent_channels,
+                out_channels=self.in_channels,
+            )
+        )
 
         return ResNetBlocks
 
     def _add_block(self, in_channels, latent_channels, out_channels, final_relu=True):
-        return ResNetBlock(in_channels=in_channels,
-                latent_channels=latent_channels,
-                out_channels=out_channels,
-                kernel_size=self.kernel_size,
-                bias=self.bias,
-                batch_norm=self.batch_norm,
-                final_relu=final_relu, dropout=self.dropout)
-
-
-
+        return ResNetBlock(
+            in_channels=in_channels,
+            latent_channels=latent_channels,
+            out_channels=out_channels,
+            kernel_size=self.kernel_size,
+            bias=self.bias,
+            batch_norm=self.batch_norm,
+            final_relu=final_relu,
+            dropout=self.dropout,
+        )

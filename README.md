@@ -10,7 +10,7 @@ This project is a __Work In Progress!__ We are looking for volunteers! Please se
 ```bash
 python main.py --config configs/example.json
 ```
-- Example for running hyperparamter optimization experiments
+- Example for running hyperparameter optimization experiments
 ```bash
 python main.py --config configs/example_hyperopt.json
 ```

@@ -26,12 +26,8 @@ Bugs are tracked in the [official issue tracker](https://github.com/utcsilab/dee
 #### Picking an issue
 
 > **Note:** If you are a first time contributor, and are looking for an issue to take on, you might want to look for [Good 
-First Issue](https://github.com/python-poetry/poetry/issues?q=is%3Aopen+is%3Aissue+label%3A%22Good+First+Issue%22)
+First Issue](https://github.com/utcsilab/deepinpy/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
 > labelled issues. We do our best to label such issues, however we might fall behind at times. So, ask us.
-
-If you would like to take on an issue, feel free to comment on the issue tagging `@python-poetry/triage`. We are more than 
-happy to discuss solutions on the issue. If you would like help with navigating
-the code base, join us on our [Discord Server](https://discordapp.com/invite/awxPgve).
 
 #### Local development
 
@@ -73,12 +69,13 @@ It is important that tests need to be together with the code otherwise the code 
 
 #### Pull requests
 
+The following steps are strongly recommended, so that the project has a consistent codebase. If you have any suggestions feel free to send a PR nevertheless (including one for this guide).
+
 * Fill in [the required template](https://github.com/utcsilab/deepinpy/blob/master/.github/PULL_REQUEST_TEMPLATE.md)
 * Be sure that your pull request contains tests that cover the changed or added code.
 * If your changes warrant a documentation change, the pull request must also update the documentation.
 
 > **Note:** Make sure your branch is [rebased](https://docs.github.com/en/free-pro-team@latest/github/using-git/about-git-r
-ebase) against the latest main branch. A maintainer might ask you to ensure the branch is
-> up-to-date prior to merging your Pull Request if changes have conflicts.
+ebase) against the latest main branch. A maintainer might ask you to ensure the branch is up-to-date prior to merging your Pull Request if changes have conflicts.
 
 All pull requests, unless otherwise instructed, need to be first accepted into the main branch (`master`).

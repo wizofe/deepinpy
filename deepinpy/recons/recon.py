@@ -48,7 +48,7 @@ class Recon(pl.LightningModule):
     def _init_hparams(self, hparams):
         self.hparams = hparams
 
-        self._loss_fun = torch.nn.MSELoss(reduction="sum")
+        self._loss_fun = torch.nn.MSELoss(reduction='sum')
 
         if hparams.abs_loss:
             self.loss_fun = self._abs_loss_fun
@@ -127,15 +127,15 @@ class Recon(pl.LightningModule):
 
         idx, data = batch
         idx = utils.itemize(idx)
-        imgs = data["imgs"]
-        inp = data["out"]
+        imgs = data['imgs']
+        inp = data['out']
 
         self.batch(data)
 
         x_hat = self.forward(inp)
 
         try:
-            num_cg = self.get_metadata()["num_cg"]
+            num_cg = self.get_metadata()['num_cg']
         except KeyError:
             num_cg = 0
 
@@ -174,7 +174,7 @@ class Recon(pl.LightningModule):
                             myim, scale_each=True, normalize=True, nrow=8, pad_value=10
                         )
                         self.logger.experiment.add_image(
-                            "3_train_prediction_rss", grid, self.current_epoch
+                            '3_train_prediction_rss', grid, self.current_epoch
                         )
 
                         while len(_x_hat.shape) > 2:
@@ -189,7 +189,7 @@ class Recon(pl.LightningModule):
                         myim, scale_each=True, normalize=True, nrow=8, pad_value=10
                     )
                     self.logger.experiment.add_image(
-                        "2_train_prediction", grid, self.current_epoch
+                        '2_train_prediction', grid, self.current_epoch
                     )
 
                     if self.current_epoch == 0:
@@ -199,7 +199,7 @@ class Recon(pl.LightningModule):
                         grid = make_grid(
                             myim, scale_each=True, normalize=True, nrow=8, pad_value=10
                         )
-                        self.logger.experiment.add_image("1_ground_truth", grid, 0)
+                        self.logger.experiment.add_image('1_ground_truth', grid, 0)
 
                         myim = torch.tensor(
                             np.stack((np.abs(_x_adj), np.angle(_x_adj)), axis=0)
@@ -207,7 +207,7 @@ class Recon(pl.LightningModule):
                         grid = make_grid(
                             myim, scale_each=True, normalize=True, nrow=8, pad_value=10
                         )
-                        self.logger.experiment.add_image("0_input", grid, 0)
+                        self.logger.experiment.add_image('0_input', grid, 0)
 
         if self.hparams.self_supervised:
             pred = self.A.forward(x_hat)
@@ -228,12 +228,12 @@ class Recon(pl.LightningModule):
         _num_cg = np.max(num_cg)
 
         log_dict = {
-            "lambda": _lambda,
-            "train_loss": _loss,
-            "epoch": self.current_epoch,
-            "nrmse": _nrmse,
-            "max_num_cg": _num_cg,
-            "val_loss": 0.0,
+            'lambda': _lambda,
+            'train_loss': _loss,
+            'epoch': self.current_epoch,
+            'nrmse': _nrmse,
+            'max_num_cg': _num_cg,
+            'val_loss': 0.0,
         }
 
         if self.logger:
@@ -241,8 +241,8 @@ class Recon(pl.LightningModule):
                 self.logger.experiment.add_scalar(key, log_dict[key], self.global_step)
 
         return {
-            "loss": loss,
-            "progress_bar": log_dict,
+            'loss': loss,
+            'progress_bar': log_dict,
         }
 
     def configure_optimizers(self):
@@ -252,9 +252,9 @@ class Recon(pl.LightningModule):
             Torch’s implementation of SGD or Adam, depending on hyperparameters.
         """
 
-        if "adam" in self.hparams.solver:
+        if 'adam' in self.hparams.solver:
             self.optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.step)
-        elif "sgd" in self.hparams.solver:
+        elif 'sgd' in self.hparams.solver:
             self.optimizer = torch.optim.SGD(self.parameters(), lr=self.hparams.step)
         if self.hparams.lr_scheduler != -1:
             # doing self.scheduler will create a scheduler instance in our self object

@@ -7,8 +7,8 @@ import tqdm
 from deepinpy import opt
 from deepinpy.forwards import MultiChannelMRI
 from deepinpy.models import ResNet, ResNet5Block
-from deepinpy.opt import ConjGrad
-from deepinpy.recons import Recon
+from deepinpy.opt.conjgrad import ConjGrad
+from deepinpy.recons.recon import Recon
 from deepinpy.utils import utils
 
 
@@ -18,13 +18,13 @@ class DeepBasisPursuitRecon(Recon):
         self.l2lam = torch.nn.Parameter(torch.tensor(hparams.l2lam_init))
         self.num_admm = hparams.num_admm
 
-        if hparams.network == "ResNet5Block":
+        if hparams.network == 'ResNet5Block':
             self.denoiser = ResNet5Block(
                 num_filters=hparams.latent_channels,
                 filter_size=7,
                 batch_norm=hparams.batch_norm,
             )
-        elif hparams.network == "ResNet":
+        elif hparams.network == 'ResNet':
             self.denoiser = ResNet(
                 latent_channels=hparams.latent_channels,
                 num_blocks=hparams.num_blocks,
@@ -36,15 +36,15 @@ class DeepBasisPursuitRecon(Recon):
 
     def batch(self, data):
 
-        maps = data["maps"]
-        masks = data["masks"]
-        inp = data["out"]
+        maps = data['maps']
+        masks = data['masks']
+        inp = data['out']
 
         self.A = MultiChannelMRI(
             maps,
             masks,
             l2lam=0.0,
-            img_shape=data["imgs"].shape,
+            img_shape=data['imgs'].shape,
             use_sigpy=self.hparams.use_sigpy,
             noncart=self.hparams.noncart,
         )
@@ -65,12 +65,7 @@ class DeepBasisPursuitRecon(Recon):
         z_old.requires_grad = False
         u.requires_grad = False
 
-        self.num_cg = np.zeros(
-            (
-                self.hparams.num_unrolls,
-                self.hparams.num_admm,
-            )
-        )
+        self.num_cg = np.zeros((self.hparams.num_unrolls, self.hparams.num_admm,))
 
         for i in range(self.hparams.num_unrolls):
             r = self.denoiser(x)
@@ -104,11 +99,11 @@ class DeepBasisPursuitRecon(Recon):
                 s_norm = opt.ip_batch(self.l2lam * self.A.adjoint(z - z_old)).sqrt()
                 if (r_norm + s_norm).max() < 1e-2:
                     if self.debug_level > 0:  # TODO: where is a defined?
-                        tqdm.tqdm.write("stopping early.")  # , a={}".format(a))
+                        tqdm.tqdm.write('stopping early.')  # , a={}".format(a))
                     break
         return x
 
     def get_metadata(self):
         return {
-            "num_cg": self.num_cg.ravel(),
+            'num_cg': self.num_cg.ravel(),
         }

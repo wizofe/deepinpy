@@ -3,8 +3,8 @@
 import torch
 
 from deepinpy.forwards import MultiChannelMRI
-from deepinpy.opt import ConjGrad
-from deepinpy.recons import Recon
+from deepinpy.opt.conjgrad import ConjGrad
+from deepinpy.recons.recon import Recon
 from deepinpy.utils import utils
 
 
@@ -16,15 +16,15 @@ class CGSenseRecon(Recon):
 
     def batch(self, data):
 
-        maps = data["maps"]
-        masks = data["masks"]
-        inp = data["out"]
+        maps = data['maps']
+        masks = data['masks']
+        inp = data['out']
 
         self.A = MultiChannelMRI(
             maps,
             masks,
             l2lam=0.0,
-            img_shape=data["imgs"].shape,
+            img_shape=data['imgs'].shape,
             use_sigpy=self.hparams.use_sigpy,
             noncart=self.hparams.noncart,
         )
@@ -45,5 +45,5 @@ class CGSenseRecon(Recon):
 
     def get_metadata(self):
         return {
-            "num_cg": self.num_cg,
+            'num_cg': self.num_cg,
         }

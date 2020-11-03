@@ -71,7 +71,7 @@ class ConjGrad(torch.nn.Module):
         """
 
         return {
-            "num_cg": self.num_cg,
+            'num_cg': self.num_cg,
         }
 
 
@@ -113,7 +113,7 @@ def conjgrad(x, b, Aop_fun, max_iter=10, l2lam=0.0, eps=1e-4, verbose=True):
     for i in range(max_iter):
 
         if verbose:
-            print("{i}: {rsnew}".format(i=i, rsnew=utils.itemize(torch.sqrt(rsnew))))
+            print('{i}: {rsnew}'.format(i=i, rsnew=utils.itemize(torch.sqrt(rsnew))))
 
         if rsnew.max() < eps_squared:
             break
@@ -141,6 +141,6 @@ def conjgrad(x, b, Aop_fun, max_iter=10, l2lam=0.0, eps=1e-4, verbose=True):
         num_iter += 1
 
     if verbose:
-        print("FINAL: {rsnew}".format(rsnew=torch.sqrt(rsnew)))
+        print('FINAL: {rsnew}'.format(rsnew=torch.sqrt(rsnew)))
 
     return x, num_iter

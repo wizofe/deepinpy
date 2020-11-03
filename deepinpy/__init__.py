@@ -1,4 +1,4 @@
 """
 Deep inverse problems in Python
 """
-name = "deepinpy"
+name = 'deepinpy'

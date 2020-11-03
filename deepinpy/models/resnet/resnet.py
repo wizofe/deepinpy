@@ -73,10 +73,10 @@ class ResNet5Block(torch.nn.Module):
             )
         self.T = T
 
-    def forward(self, x, device="cpu"):
+    def forward(self, x, device='cpu'):
         return x + self.step(x, device=device)
 
-    def step(self, x, device="cpu"):
+    def step(self, x, device='cpu'):
         # reshape (batch,x,y,channel=2) -> (batch,channe=2,x,y)
         x = x.permute(0, 3, 1, 2)
         y = self.model(x)

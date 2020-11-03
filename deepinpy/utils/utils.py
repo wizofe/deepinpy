@@ -21,7 +21,7 @@ def h5_write(filename, data):
         data (dict): Dictionary of data to save
 
     """
-    with h5py.File(filename, "w") as F:
+    with h5py.File(filename, 'w') as F:
         for key in data.keys():
             F.create_dataset(key, data=data[key])
 
@@ -37,12 +37,12 @@ def h5_read(filename, key_list):
         A dictionary of numpy arrays matching key_list
     """
     data = {}
-    with h5py.File(filename, "r") as F:
+    with h5py.File(filename, 'r') as F:
         for key in key_list:
             try:
                 data[key] = np.array(F[key])
             except Exception:
-                print("Key {} not found in {}. Skipping.".format(key, filename))
+                print('Key {} not found in {}. Skipping.'.format(key, filename))
                 data[key] = None
     return data
 

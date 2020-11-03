@@ -5,8 +5,8 @@ import torch
 
 from deepinpy.forwards import MultiChannelMRI
 from deepinpy.models import ResNet, ResNet5Block, UnrollNet
-from deepinpy.opt import ConjGrad
-from deepinpy.recons import Recon
+from deepinpy.opt.conjgrad import ConjGrad
+from deepinpy.recons.recon import Recon
 from deepinpy.utils import utils
 
 
@@ -15,13 +15,13 @@ class MoDLRecon(Recon):
         super(MoDLRecon, self).__init__(hparams)
         self.l2lam = torch.nn.Parameter(torch.tensor(hparams.l2lam_init))
 
-        if hparams.network == "ResNet5Block":
+        if hparams.network == 'ResNet5Block':
             self.denoiser = ResNet5Block(
                 num_filters=hparams.latent_channels,
                 filter_size=7,
                 batch_norm=hparams.batch_norm,
             )
-        elif hparams.network == "ResNet":
+        elif hparams.network == 'ResNet':
             self.denoiser = ResNet(
                 latent_channels=hparams.latent_channels,
                 num_blocks=hparams.num_blocks,
@@ -48,7 +48,7 @@ class MoDLRecon(Recon):
 
     def get_metadata(self):
         return {
-            "num_cg": np.array([m["num_cg"] for m in self.unroll_model.get_metadata()]),
+            'num_cg': np.array([m['num_cg'] for m in self.unroll_model.get_metadata()]),
         }
 
 
@@ -63,15 +63,15 @@ class MoDLReconOneUnroll(torch.nn.Module):
 
     def batch(self, data):
 
-        maps = data["maps"]
-        masks = data["masks"]
-        inp = data["out"]
+        maps = data['maps']
+        masks = data['masks']
+        inp = data['out']
 
         self.A = MultiChannelMRI(
             maps,
             masks,
             l2lam=0.0,
-            img_shape=data["imgs"].shape,
+            img_shape=data['imgs'].shape,
             use_sigpy=self.hparams.use_sigpy,
             noncart=self.hparams.noncart,
         )
@@ -79,7 +79,7 @@ class MoDLReconOneUnroll(torch.nn.Module):
 
     def forward(self, x):
 
-        assert self.x_adj is not None, "x_adj not computed!"
+        assert self.x_adj is not None, 'x_adj not computed!'
         r = self.denoiser(x)
 
         cg_op = ConjGrad(
@@ -97,5 +97,5 @@ class MoDLReconOneUnroll(torch.nn.Module):
 
     def get_metadata(self):
         return {
-            "num_cg": self.num_cg,
+            'num_cg': self.num_cg,
         }

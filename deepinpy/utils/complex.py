@@ -12,13 +12,13 @@ channels are stored in the last dimension
 
 def c2r(z):
     """ Convert from complex to 2-channel real """
-    assert type(z) is np.ndarray, "Must be numpy.ndarray"
+    assert type(z) is np.ndarray, 'Must be numpy.ndarray'
     return np.stack((z.real, z.imag), axis=-1)
 
 
 def r2c(x):
     """ Convert from 2-channel real to complex """
-    assert type(x) is np.ndarray, "Must be numpy.ndarray"
+    assert type(x) is np.ndarray, 'Must be numpy.ndarray'
     return x[..., 0] + 1j * x[..., 1]
 
 

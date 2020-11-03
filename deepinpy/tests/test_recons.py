@@ -13,16 +13,16 @@ from deepinpy.forwards import MultiChannelMRIDataset
 from deepinpy.recons import CGSenseRecon, DeepBasisPursuitRecon, MoDLRecon, ResNetRecon
 
 # FIXME: configs
-parser = HyperOptArgumentParser(strategy="random_search")
+parser = HyperOptArgumentParser(strategy='random_search')
 args = parser.parse_args()
 args.cg_max_iter = 2
 args.eps = 1e-6
 args.fully_sampled = True
 args.stdev = 1e-3
-args.data_file = "deepinpy/tests/dataset_unittest.h5"
+args.data_file = 'deepinpy/tests/dataset_unittest.h5'
 args.num_data_sets = 2
 args.inverse_crime = False
-args.solver = "adam"
+args.solver = 'adam'
 args.step = 1e-4
 args.batch_size = 1
 args.shuffle = True
@@ -31,7 +31,7 @@ args.num_unrolls = 2
 args.num_admm = 2
 args.cg_eps = 1e-5
 args.l2lam_init = 0.01
-args.network = "ResNet"
+args.network = 'ResNet'
 args.latent_channels = 4
 args.num_blocks = 2
 args.batch_norm = False
@@ -52,19 +52,19 @@ class TestRecon(unittest.TestCase):
     def test_recon(self):
         args.Dataset = MultiChannelMRIDataset
         for recon in [CGSenseRecon, MoDLRecon, ResNetRecon, DeepBasisPursuitRecon]:
-            print("Testing Recon {}".format(recon))
+            print('Testing Recon {}'.format(recon))
 
-            print("  CPU:")
+            print('  CPU:')
             M = recon(args)
             trainer = Trainer(max_epochs=args.num_epochs, gpus=None, logger=False)
             trainer.fit(M)
 
             if torch.cuda.device_count() > 0:
-                print("  GPU:")
+                print('  GPU:')
                 M = recon(args)
                 trainer = Trainer(max_epochs=args.num_epochs, gpus=[0], logger=False)
                 trainer.fit(M)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

@@ -41,7 +41,7 @@ class MultiChannelMRI(torch.nn.Module):
         self._normal = None
 
         if self.noncart:
-            assert use_sigpy, "Must use SigPy for NUFFT!"
+            assert use_sigpy, 'Must use SigPy for NUFFT!'
 
         if use_sigpy:
             from sigpy import from_pytorch, to_device, Device

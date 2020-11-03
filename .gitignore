@@ -192,6 +192,7 @@ dmypy.json
 .prof
 
 ### VisualStudioCode ###
+.vscode/
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json

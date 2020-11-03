@@ -5,5 +5,4 @@ opt submodule
 Optimization routines
 """
 
-from .conjgrad import ConjGrad
 from .opt import *

@@ -3,6 +3,7 @@
 
 import numpy as np
 import torch
+import torch.fft
 
 import deepinpy.utils.complex as cp
 
@@ -187,11 +188,11 @@ def maps_adj(cimg, maps):
 
 
 def fft_forw(x, ndim=2):
-    return torch.fft(x, signal_ndim=ndim, normalized=True)
+    return torch.fft.fft(x, signal_ndim=ndim, normalized=True)
 
 
 def fft_adj(x, ndim=2):
-    return torch.ifft(x, signal_ndim=ndim, normalized=True)
+    return torch.fft.ifft(x, signal_ndim=ndim, normalized=True)
 
 
 def mask_forw(y, mask):
